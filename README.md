@@ -4,7 +4,7 @@ EcoBlock Network is a decentralized autonomous organization (DAO) and blockchain
 
 ## Disclaimer
 
-This project is developed for educational and non-commercial purposes only. It is not intended for commercial use. If you are interested in using this project for commercial applications, please contact me on LinkedIn: [https://www.linkedin.com/in/sedik-darragi-73b205352/]
+This project is developed for educational and non-commercial purposes only, it was developed during the hackathon IMSET 2025. It is not intended for commercial use. If you are interested in using this project for commercial applications, please contact me on LinkedIn: [https://www.linkedin.com/in/sedik-darragi-73b205352/]
 
 ## Installation Steps
 
