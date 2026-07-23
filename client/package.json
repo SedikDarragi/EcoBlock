@@ -78,7 +78,14 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "^5.3.3"
+    "typescript": "~5.8.3"
   },
-  "description": "An Ionic project"
+  "description": "An Ionic project",
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "esbuild@0.28.0": true,
+    "esbuild@0.25.12": true,
+    "lmdb@3.2.6": true,
+    "msgpackr-extract@3.0.4": true
+  }
 }

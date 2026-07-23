@@ -1,12 +1,11 @@
-// environment.ts
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:5000/api',
-  rpcUrl: 'https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY',
+  production: true,
+  apiUrl: 'https://ecoblock-api.onrender.com/api',
+  rpcUrl: 'https://eth-sepolia.g.alchemy.com/v2/demo',
   contractAddresses: {
     ecoBlockToken: '0x...',
     energyMarket: '0x...',
     materialTrace: '0x...'
   },
-  testMode: false
+  testMode: true
 };

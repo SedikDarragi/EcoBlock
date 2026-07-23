@@ -1,0 +1,8 @@
+[build]
+  command = "cd client && npm ci --legacy-peer-deps && npm run build"
+  publish = "client/www"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
