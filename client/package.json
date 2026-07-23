@@ -80,6 +80,18 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.8.3"
   },
+  "overrides": {
+    "@capacitor/core": "$@capacitor/core",
+    "@capacitor/cli": "$@capacitor/cli",
+    "@capacitor/android": "$@capacitor/android",
+    "@capacitor/app": "$@capacitor/app",
+    "@capacitor/browser": "$@capacitor/browser",
+    "@capacitor/camera": "$@capacitor/camera",
+    "@capacitor/haptics": "$@capacitor/haptics",
+    "@capacitor/keyboard": "$@capacitor/keyboard",
+    "@capacitor/preferences": "$@capacitor/preferences",
+    "@capacitor/status-bar": "$@capacitor/status-bar"
+  },
   "description": "An Ionic project",
   "allowScripts": {
     "@parcel/watcher@2.6.0": true,
