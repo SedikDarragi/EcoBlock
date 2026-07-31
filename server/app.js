@@ -35,9 +35,21 @@ const corsOptions = {
       'http://localhost',      // Fallback
       'ionic://localhost'      // Ionic iOS/Android
     ];
-    
+
+    // Allow deployed frontend origins configured via env var (comma-separated)
+    if (process.env.CLIENT_URL) {
+      process.env.CLIENT_URL.split(',').map(url => url.trim()).forEach(url => {
+        if (url && allowedOrigins.indexOf(url) === -1) {
+          allowedOrigins.push(url);
+        }
+      });
+    }
+
+    // Allow any Netlify site (e.g. *.netlify.app)
+    const isNetlify = /^https:\/\/[a-z0-9-]+\.netlify\.app$/i.test(origin);
+
     // Allow requests with no origin (mobile apps, Postman)
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin || isNetlify || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       console.warn(`Blocked by CORS: ${origin}`);
@@ -54,11 +66,9 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
-// Request logging middleware
+// Request logging middleware (method + path only; never log headers or bodies)
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
   next();
 });
 

@@ -12,12 +12,8 @@ const userActivitySchema = new mongoose.Schema({
     required: true
   },
   details: {
-    productId: String,
-    name: String,
-    brand: String,
-    points: Number,
-    scannedAt: Date,
-    imageUrl: String
+    type: Object,
+    required: true
   }
 }, { timestamps: true });
 
