@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { JWT_SECRET } from '../config/jwt.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -33,7 +34,7 @@ export const register = async (req, res) => {
 
     const token = jwt.sign(
       payload,
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -78,7 +79,7 @@ export const login = async (req, res) => {
 
     const token = jwt.sign(
       payload,
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: '7d' }
     );
 
