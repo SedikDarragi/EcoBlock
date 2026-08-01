@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "EcoBlock Network Backend",
   "main": "app.js",
+  "engines": {
+    "node": ">=18"
+  },
   "type": "module",
   "exports": {
     "./middleware": "./server/middleware/index.js"

@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: ecoblock-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run prewarm:mongo
+    startCommand: node app.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: JWT_SECRET
+        generateValue: true
