@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, OnInit, OnDestroy, inject } from '@angular/core';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonCard, 
   IonCardHeader, IonCardTitle, IonCardContent, IonIcon,
@@ -8,6 +8,9 @@ import { addIcons } from 'ionicons';
 import { flash, reloadCircle } from 'ionicons/icons';
 import { Chart, registerables } from 'chart.js';
 import { CommonModule, NgFor } from '@angular/common';
+import { AuthService } from '../services/auth.service';
+import { BlockchainService } from '../services/blockchain.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -21,13 +24,17 @@ import { CommonModule, NgFor } from '@angular/common';
     CommonModule // This includes NgFor directive
   ]
 })
-export class HomePage implements AfterViewInit {
+export class HomePage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('energyChart') chartRef!: ElementRef;
   energyChart: any;
 
+  private auth = inject(AuthService);
+  private blockchain = inject(BlockchainService);
+  private subs: Subscription[] = [];
+
   quickStats = [
-    { value: '1.2M+', label: 'Total Transactions' },
-    { value: '45K+', label: 'Active Users' },
+    { value: '0', label: 'Your EcoPoints' },
+    { value: '0.0000', label: 'EBT Balance' },
     { value: '350K+', label: 'kWh Traded' },
     { value: '85K+', label: 'Items Recycled' }
   ];
@@ -35,6 +42,29 @@ export class HomePage implements AfterViewInit {
   constructor() {
     addIcons({ flash, reloadCircle }); // Using reloadCircle instead of recycle
     Chart.register(...registerables);
+  }
+
+  ngOnInit() {
+    const user = this.auth.getCurrentUser();
+    if (user && user.ecoPoints !== undefined) {
+      this.quickStats[0].value = user.ecoPoints.toLocaleString();
+    }
+    this.subs.push(this.auth.currentUser$.subscribe(u => {
+      if (u && u.ecoPoints !== undefined) {
+        this.quickStats[0].value = u.ecoPoints.toLocaleString();
+      }
+    }));
+
+    if (this.blockchain.walletAddress) {
+      this.quickStats[1].value = this.blockchain.ebtBalance;
+    }
+    this.subs.push(this.blockchain.onBalanceChanged.subscribe(balance => {
+      this.quickStats[1].value = balance;
+    }));
+  }
+
+  ngOnDestroy() {
+    this.subs.forEach(sub => sub.unsubscribe());
   }
 
   ngAfterViewInit() {

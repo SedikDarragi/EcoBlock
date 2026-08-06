@@ -87,7 +87,7 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Token Balances Section -->
+    <!-- Tokens & Rewards Section -->
     <ion-card>
       <ion-card-header>
         <ion-card-title>Your Tokens</ion-card-title>
@@ -99,20 +99,18 @@
           </ion-avatar>
           <ion-label>
             <h3>EcoBlock Tokens</h3>
-            <p>EBT Balance</p>
+            <p>Wallet balance</p>
           </ion-label>
           <ion-badge color="primary">{{ ebtBalance }} EBT</ion-badge>
         </ion-item>
 
         <ion-item lines="none">
-          <ion-avatar slot="start">
-            <img src="assets/images/hbar-token.png" alt="HBAR Token">
-          </ion-avatar>
+          <ion-icon name="leaf" slot="start" color="success"></ion-icon>
           <ion-label>
-            <h3>HBAR Tokens</h3>
-            <p>Hedera Balance</p>
+            <h3>EcoPoints</h3>
+            <p>Earned from scans & recycling</p>
           </ion-label>
-          <ion-badge color="success">{{ hbarBalance }} HBAR</ion-badge>
+          <ion-badge color="success">{{ ecoPoints }}</ion-badge>
         </ion-item>
       </ion-card-content>
     </ion-card>

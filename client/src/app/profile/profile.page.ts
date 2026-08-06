@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, HostBinding } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostBinding } from '@angular/core';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonCard, 
   IonCardHeader, IonCardTitle, IonCardContent, IonButton,
@@ -8,9 +8,10 @@ import {
 import { AuthService } from '../services/auth.service';
 import { BlockchainService } from '../services/blockchain.service';
 import { addIcons } from 'ionicons';
-import { camera, wallet, logOut, key, mail, person } from 'ionicons/icons';
+import { camera, wallet, logOut, key, mail, person, leaf } from 'ionicons/icons';
 import { ShortenAddressPipe } from '../pipes/shorten-address.pipe';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-profile',
@@ -25,7 +26,7 @@ import { CommonModule } from '@angular/common';
     CommonModule, ShortenAddressPipe
   ]
 })
-export class ProfilePage implements OnInit {
+export class ProfilePage implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private blockchain = inject(BlockchainService);
   private toastCtrl = inject(ToastController);
@@ -34,26 +35,65 @@ export class ProfilePage implements OnInit {
   profileImage = 'assets/images/default-avatar.png';
   walletAddress: string | null = null;
   userName = 'EcoUser';
-  userEmail = 'user@ecoblock.com';
-  ebtBalance = '125.50';
-  hbarBalance = '42.75';
+  userEmail = '';
+  ecoPoints = 0;
+  ebtBalance = '0.0000';
+
+  private subs: Subscription[] = [];
 
   constructor() {
-    addIcons({ camera, wallet, logOut, key, mail, person });
+    addIcons({ camera, wallet, logOut, key, mail, person, leaf });
   }
 
   async ngOnInit() {
-    this.loadWalletState();
-    this.blockchain.onWalletConnected.subscribe(address => {
+    this.applyUser(this.auth.getCurrentUser());
+    this.subs.push(this.auth.currentUser$.subscribe(user => this.applyUser(user)));
+
+    this.walletAddress = this.blockchain.walletAddress || this.auth.getCurrentUser()?.walletAddress || null;
+    this.ebtBalance = this.blockchain.ebtBalance;
+
+    this.subs.push(this.blockchain.onWalletConnected.subscribe(address => {
       this.walletAddress = address;
-    });
-    this.blockchain.onWalletDisconnected.subscribe(() => {
-      this.walletAddress = null;
-    });
+      this.updateBalance();
+    }));
+    this.subs.push(this.blockchain.onWalletDisconnected.subscribe(() => {
+      this.walletAddress = this.auth.getCurrentUser()?.walletAddress || null;
+      this.ebtBalance = '0.0000';
+    }));
+    this.subs.push(this.blockchain.onBalanceChanged.subscribe(balance => {
+      this.ebtBalance = balance;
+    }));
+
+    this.updateBalance();
   }
 
-  private loadWalletState() {
-    this.walletAddress = this.blockchain.walletAddress;
+  ngOnDestroy() {
+    this.subs.forEach(sub => sub.unsubscribe());
+  }
+
+  private applyUser(user: any) {
+    if (!user) return;
+    this.userEmail = user.email || '';
+    this.ecoPoints = user.ecoPoints ?? 0;
+    if (user.email) {
+      this.userName = user.email.split('@')[0];
+    }
+    if (user.walletAddress && !this.blockchain.walletAddress) {
+      this.walletAddress = user.walletAddress;
+    }
+  }
+
+  private async updateBalance() {
+    if (!this.walletAddress) {
+      this.ebtBalance = '0.0000';
+      return;
+    }
+    try {
+      await this.blockchain.updateBalance();
+      this.ebtBalance = this.blockchain.ebtBalance;
+    } catch (error) {
+      console.error('Balance update error:', error);
+    }
   }
 
   async connectWallet() {

@@ -67,7 +67,7 @@ contract EnergyMarket {
         require(listing.amount >= amount, "EnergyMarket: insufficient energy available");
         require(listing.seller != msg.sender, "EnergyMarket: cannot buy your own listing");
 
-        uint256 cost = amount * listing.pricePerUnit;
+        uint256 cost = (amount * listing.pricePerUnit) / 1e18;
         require(msg.value >= cost, "EnergyMarket: insufficient payment");
 
         listing.amount -= amount;
