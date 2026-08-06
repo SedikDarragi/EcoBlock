@@ -349,7 +349,7 @@ export class RecycleRewardsPage implements AfterViewInit {
   async connectWallet() {
     try {
       const address = await this.blockchain.connectWallet();
-      if (!address || address.startsWith('0x')) {
+      if (!address || !address.startsWith('0x')) {
         throw new Error('Invalid wallet address');
       }
       this.showToast('Wallet connected successfully!');

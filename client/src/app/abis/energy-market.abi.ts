@@ -43,5 +43,32 @@ export const ENERGY_MARKET_ABI = [
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "uint256", "name": "id", "type": "uint256"},
+      {"indexed": true, "internalType": "address", "name": "seller", "type": "address"},
+      {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"},
+      {"indexed": false, "internalType": "uint256", "name": "pricePerUnit", "type": "uint256"},
+      {"indexed": false, "internalType": "string", "name": "energyType", "type": "string"},
+      {"indexed": false, "internalType": "string", "name": "location", "type": "string"},
+      {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"}
+    ],
+    "name": "ListingCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "uint256", "name": "id", "type": "uint256"},
+      {"indexed": true, "internalType": "address", "name": "buyer", "type": "address"},
+      {"indexed": true, "internalType": "address", "name": "seller", "type": "address"},
+      {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"},
+      {"indexed": false, "internalType": "uint256", "name": "cost", "type": "uint256"},
+      {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"}
+    ],
+    "name": "EnergyPurchased",
+    "type": "event"
   }
 ];

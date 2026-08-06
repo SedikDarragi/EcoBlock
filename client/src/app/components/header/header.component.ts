@@ -11,7 +11,6 @@ import { personCircle } from 'ionicons/icons';
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss'],
   standalone: true,
   imports: [
     IonHeader, IonToolbar, IonTitle, IonButtons,
@@ -27,6 +26,6 @@ export class HeaderComponent {
   }
 
   navigateToSettings() {
-    this.router.navigate(['/settings']);
+    this.router.navigate(['/profile']);
   }
 }

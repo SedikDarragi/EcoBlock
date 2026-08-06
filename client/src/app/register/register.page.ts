@@ -67,7 +67,7 @@ async register() {
         color: 'success'
       });
       await toast.present();
-      this.router.navigate(['/home'], { replaceUrl: true });
+      this.router.navigate(['/tabs/home'], { replaceUrl: true });
     }
   } catch (error: any) {
     console.error('Registration error:', error);
