@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "EcoBlock Network Fullstack Application",
   "scripts": {
-    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
+    "start": "node server/app.js",
     "start:client": "cd client && npm start",
     "start:server": "cd server && npm run dev",
     "install-all": "npm install && cd client && npm install && cd ../server && npm install",
@@ -36,7 +36,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "main": "index.js",
+  "main": "server/app.js",
   "exports": {
     ".": "./server/app.js",
     "./middleware": "./server/middleware/auth.js"
