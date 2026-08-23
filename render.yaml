@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     rootDir: server
-    buildCommand: npm install && npm run prewarm:mongo
+    buildCommand: npm install --legacy-peer-deps
     startCommand: node app.js
     healthCheckPath: /api/health
     envVars:
