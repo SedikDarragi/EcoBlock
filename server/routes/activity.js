@@ -12,26 +12,18 @@ const RECYCLE_RATES = {
   metal: 25
 };
 
-// POST /api/activity/recycle
 router.post('/recycle', auth, async (req, res) => {
   try {
     const { material, weight } = req.body;
 
     if (!material || !weight || isNaN(weight) || Number(weight) <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'A valid material and positive weight are required'
-      });
+      return res.status(400).json({ success: false, message: 'A valid material and positive weight are required' });
     }
 
     if (!Object.prototype.hasOwnProperty.call(RECYCLE_RATES, material)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Unsupported material type'
-      });
+      return res.status(400).json({ success: false, message: 'Unsupported material type' });
     }
 
-    // Compute points server-side; never trust client-supplied values
     const pointsEarned = Math.round(RECYCLE_RATES[material] * Number(weight));
 
     const activity = new UserActivity({
@@ -39,28 +31,14 @@ router.post('/recycle', auth, async (req, res) => {
       activityType: 'recycle',
       details: { material, weight: Number(weight), pointsEarned }
     });
-
     await activity.save();
 
-    // Credit eco-points to the user
-    await User.updateOne(
-      { _id: req.user._id },
-      { $inc: { ecoPoints: pointsEarned } }
-    );
+    await User.findByIdAndUpdate(req.user._id, { $inc: { ecoPoints: pointsEarned } });
 
-    res.status(201).json({
-      success: true,
-      message: 'Recycling recorded successfully',
-      pointsEarned,
-      data: activity
-    });
-
+    res.status(201).json({ success: true, message: 'Recycling recorded successfully', pointsEarned, data: activity });
   } catch (error) {
     console.error('Recycle error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -69,11 +47,9 @@ router.get('/scan-history', auth, async (req, res) => {
     const history = await UserActivity.find({
       userId: req.user._id,
       activityType: 'product_scan'
-    })
-    .sort({ 'details.scannedAt': -1 })
-    .limit(20);
+    });
 
-    res.json(history.map(item => ({
+    res.json(history.slice(0, 20).map(item => ({
       id: item._id,
       productId: item.details.productId,
       name: item.details.name,
@@ -82,7 +58,6 @@ router.get('/scan-history', auth, async (req, res) => {
       date: item.details.scannedAt,
       image: item.details.imageUrl
     })));
-
   } catch (error) {
     console.error('History fetch error:', error);
     res.status(500).json({ error: 'Failed to load scan history' });

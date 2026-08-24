@@ -12,6 +12,8 @@ typechain-types/
 server/.env
 contracts/.env
 
+server/*.db
+
 *.log
 .DS_Store
 Thumbs.db

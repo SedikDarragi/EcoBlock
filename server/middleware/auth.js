@@ -5,14 +5,12 @@ import { JWT_SECRET } from '../config/jwt.js';
 const auth = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
     if (!token) {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findOne({ _id: decoded.user.id });
-
+    const user = await User.findById(decoded.user.id);
     if (!user) {
       return res.status(401).json({ error: 'Invalid token' });
     }
@@ -25,9 +23,4 @@ const auth = async (req, res, next) => {
   }
 };
 
-// Using named export (recommended)
 export { auth };
-
-// Alternative: If you prefer default export instead, use:
-// export default auth;
-// (but choose only one export method)

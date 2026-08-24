@@ -1,20 +1,24 @@
-import mongoose from 'mongoose';
+import { userActivities } from '../db.js';
 
-const userActivitySchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  activityType: {
-    type: String,
-    enum: ['product_scan', 'energy_trade', 'recycle'],
-    required: true
-  },
-  details: {
-    type: Object,
-    required: true
+class UserActivity {
+  constructor(data) {
+    this.userId = data.userId;
+    this.activityType = data.activityType;
+    this.details = data.details;
+    this.createdAt = new Date();
   }
-}, { timestamps: true });
 
-export const UserActivity = mongoose.model('UserActivity', userActivitySchema);
+  async save() {
+    return userActivities.insert(this);
+  }
+
+  static async find(query) {
+    return userActivities.find(query).sort({ createdAt: -1 });
+  }
+
+  static async findOne(query) {
+    return userActivities.findOne(query);
+  }
+}
+
+export { UserActivity };

@@ -1,75 +1,46 @@
-import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { users } from '../db.js';
 
-const UserSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  walletAddress: {
-    type: String,
-    required: false
-  },
-  ecoPoints: {
-    type: Number,
-    default: 0
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-// UserActivity schema
-const userActivitySchema = new mongoose.Schema({
-  userId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true 
-  },
-  activityType: { 
-    type: String, 
-    enum: ['energy_trade', 'recycle', 'product_scan'],
-    required: true 
-  },
-  details: { 
-    type: Object, 
-    required: true 
-  },
-  timestamp: { 
-    type: Date, 
-    default: Date.now 
-  }
-});
-
-// Hash password before saving
-UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-  try {
+const User = {
+  async create({ email, password, walletAddress }) {
     const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const doc = await users.insert({
+      email: email.toLowerCase().trim(),
+      password: hashedPassword,
+      walletAddress: walletAddress || '',
+      ecoPoints: 0,
+      createdAt: new Date()
+    });
+    return doc;
+  },
 
-// 3. Add method to compare passwords
-UserSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  async findOne(query) {
+    return users.findOne(query);
+  },
+
+  async findById(id) {
+    return users.findOne({ _id: id });
+  },
+
+  async findByIdAndUpdate(id, update, options) {
+    const set = {};
+    if (update.$inc) {
+      for (const [k, v] of Object.entries(update.$inc)) {
+        const doc = await users.findOne({ _id: id });
+        set[k] = (doc?.[k] || 0) + v;
+      }
+    } else {
+      Object.assign(set, update);
+    }
+    await users.update({ _id: id }, { $set: set });
+    if (options?.new) return users.findOne({ _id: id });
+    return null;
+  },
+
+  async comparePassword(candidatePassword, hashedPassword) {
+    return bcrypt.compare(candidatePassword, hashedPassword);
+  }
 };
 
-// 4. Check if model exists before compiling
-const User = mongoose.models.User || 
-             mongoose.model('User', UserSchema); // Note: Using UserSchema here
-
-// 5. Export the model
 export default User;

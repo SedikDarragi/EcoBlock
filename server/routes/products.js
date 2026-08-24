@@ -6,32 +6,22 @@ import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Validate product scan
 router.post('/validate', auth, async (req, res) => {
   try {
     const { id, productId, barcode } = req.body;
-
-    // Accept either productId/id or barcode to find the product
     const actualProduct = productId || id;
 
     if (!actualProduct && !barcode) {
-      return res.status(400).json({
-        valid: false,
-        message: 'Product ID or barcode is required'
-      });
+      return res.status(400).json({ valid: false, message: 'Product ID or barcode is required' });
     }
 
     const query = barcode ? { barcode } : { _id: actualProduct };
     const product = await Product.findOne(query);
 
     if (!product) {
-      return res.status(404).json({
-        valid: false,
-        message: 'Product not found or barcode does not match'
-      });
+      return res.status(404).json({ valid: false, message: 'Product not found or barcode does not match' });
     }
 
-    // Dedupe scans: reject if the user already scanned this product
     const alreadyScanned = await UserActivity.findOne({
       userId: req.user._id,
       activityType: 'product_scan',
@@ -39,13 +29,9 @@ router.post('/validate', auth, async (req, res) => {
     });
 
     if (alreadyScanned) {
-      return res.status(400).json({
-        valid: false,
-        message: 'This product has already been scanned by you'
-      });
+      return res.status(400).json({ valid: false, message: 'This product has already been scanned by you' });
     }
 
-    // Record the scan using values from the DB (never trust the client)
     const activity = new UserActivity({
       userId: req.user._id,
       activityType: 'product_scan',
@@ -59,14 +45,9 @@ router.post('/validate', auth, async (req, res) => {
         scannedAt: new Date()
       }
     });
-
     await activity.save();
 
-    // Credit eco-points to the user
-    await User.updateOne(
-      { _id: req.user._id },
-      { $inc: { ecoPoints: product.points } }
-    );
+    await User.findByIdAndUpdate(req.user._id, { $inc: { ecoPoints: product.points } });
 
     res.json({
       valid: true,
@@ -83,13 +64,9 @@ router.post('/validate', auth, async (req, res) => {
         image: product.imageUrl
       }
     });
-
   } catch (error) {
     console.error('Product validation error:', error);
-    res.status(500).json({
-      valid: false,
-      message: 'Server error during validation'
-    });
+    res.status(500).json({ valid: false, message: 'Server error during validation' });
   }
 });
 
