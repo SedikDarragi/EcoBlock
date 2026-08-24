@@ -33,7 +33,8 @@ const corsOptions = {
       'http://localhost:3000', // React/Vue
       'capacitor://localhost', // Capacitor
       'http://localhost',      // Fallback
-      'ionic://localhost'      // Ionic iOS/Android
+      'ionic://localhost',     // Ionic iOS/Android
+      'https://ecoblock-network.netlify.app' // Deployed client
     ];
 
     // Allow deployed frontend origins configured via env var (comma-separated)
