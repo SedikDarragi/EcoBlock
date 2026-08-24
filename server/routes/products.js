@@ -2,8 +2,7 @@ import express from 'express';
 import Product from '../models/Product.js';
 import { UserActivity } from '../models/UserActivity.js';
 import User from '../models/User.js';
-import { requireModule } from '../utils/importer.js';
-const { auth } = await requireModule('../middleware/auth.js', import.meta.url);
+import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 

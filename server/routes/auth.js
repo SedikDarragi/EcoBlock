@@ -1,7 +1,6 @@
 import express from 'express';
 import { register, login, getUser, linkWallet, validateToken } from '../controllers/authController.js';
-import { requireModule } from '../utils/importer.js';
-const { auth } = await requireModule('../middleware/auth.js', import.meta.url);
+import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
