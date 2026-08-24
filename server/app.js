@@ -1,5 +1,4 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { fileURLToPath } from 'url';
@@ -64,8 +63,8 @@ const corsOptions = {
 
 // Middleware
 app.use(cors(corsOptions));
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging middleware (method + path only; never log headers or bodies)
 app.use((req, res, next) => {
@@ -76,8 +75,10 @@ app.use((req, res, next) => {
 // Handle preflight requests
 app.options('*', cors(corsOptions));
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (non-blocking - server starts even if DB is unavailable)
+connectDB().catch(err => {
+  console.error('[WARN] Database unavailable, running without DB:', err.message);
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
