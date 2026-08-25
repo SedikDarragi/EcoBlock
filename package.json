@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "EcoBlock Network Fullstack Application",
   "scripts": {
-    "start": "node server/app.js",
+    "start": "node index.js",
     "start:client": "cd client && npm start",
     "start:server": "cd server && npm run dev",
     "install-all": "npm install && cd client && npm install && cd ../server && npm install",

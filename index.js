@@ -12,21 +12,21 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const JWT_SECRET = process.env.JWT_SECRET || 'ecoblock-demo-secret-change-in-prod';
 
 class JsonStore {
   constructor(name) {
-    this.filePath = path.join(__dirname, 'server', `${name}.json`);
+    this.filePath = path.join(__dirname, 'server', name + '.json');
     this.data = [];
     try {
       if (fs.existsSync(this.filePath)) {
         this.data = JSON.parse(fs.readFileSync(this.filePath, 'utf8'));
       }
-    } catch { this.data = []; }
+    } catch (e) { console.log('Store init error:', e.message); }
   }
   _save() {
-    try { fs.writeFileSync(this.filePath, JSON.stringify(this.data, null, 2)); } catch {}
+    try { fs.writeFileSync(this.filePath, JSON.stringify(this.data, null, 2)); }
+    catch (e) { console.log('Save error:', e.message); }
   }
   _id() { return crypto.randomBytes(12).toString('hex'); }
   _match(doc, q) {
@@ -35,11 +35,11 @@ class JsonStore {
     }
     return true;
   }
-  async insert(doc) { const d = { ...doc, _id: doc._id || this._id() }; this.data.push(d); this._save(); return d; }
-  async findOne(q) { return this.data.find(d => this._match(d, q)) || null; }
-  async find(q) { return this.data.filter(d => this._match(d, q)); }
-  async count(q) { return (!q || !Object.keys(q).length) ? this.data.length : this.data.filter(d => this._match(d, q)).length; }
-  async update(q, u) {
+  insert(doc) { const d = { ...doc, _id: doc._id || this._id() }; this.data.push(d); this._save(); return Promise.resolve(d); }
+  findOne(q) { return Promise.resolve(this.data.find(d => this._match(d, q)) || null); }
+  find(q) { return Promise.resolve(this.data.filter(d => this._match(d, q))); }
+  count(q) { return Promise.resolve((!q || !Object.keys(q).length) ? this.data.length : this.data.filter(d => this._match(d, q)).length); }
+  update(q, u) {
     let c = 0;
     for (const d of this.data) {
       if (this._match(d, q)) {
@@ -49,7 +49,7 @@ class JsonStore {
       }
     }
     if (c) this._save();
-    return c;
+    return Promise.resolve(c);
   }
 }
 
@@ -57,11 +57,14 @@ const users = new JsonStore('users');
 const activities = new JsonStore('activities');
 const products = new JsonStore('products');
 
-const pCount = await products.count({});
-if (pCount === 0) {
-  await products.insert({ _id: 'demo-product-123', name: 'Organic Cotton T-Shirt', brand: 'EcoWear', points: 30, barcode: '123456789012', imageUrl: 'assets/images/tshirt.jpg' });
-  await products.insert({ _id: 'eco-bottle-456', name: 'Reusable Water Bottle', brand: 'HydroFlask', points: 50, barcode: '987654321098', imageUrl: 'assets/images/bottle.jpg' });
-}
+try {
+  const pCount = await products.count({});
+  if (pCount === 0) {
+    await products.insert({ _id: 'demo-product-123', name: 'Organic Cotton T-Shirt', brand: 'EcoWear', points: 30, barcode: '123456789012', imageUrl: 'assets/images/tshirt.jpg' });
+    await products.insert({ _id: 'eco-bottle-456', name: 'Reusable Water Bottle', brand: 'HydroFlask', points: 50, barcode: '987654321098', imageUrl: 'assets/images/bottle.jpg' });
+    console.log('Seeded demo products');
+  }
+} catch (e) { console.log('Seed error:', e.message); }
 
 const app = express();
 app.use(cors({ origin: function(o, cb) {
@@ -69,6 +72,18 @@ app.use(cors({ origin: function(o, cb) {
   cb(null, ok);
 }, credentials: true }));
 app.use(express.json());
+
+const auth = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ error: 'Authentication required' });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await users.findOne({ _id: decoded.user.id });
+    if (!user) return res.status(401).json({ error: 'Invalid token' });
+    req.user = user;
+    next();
+  } catch { res.status(401).json({ error: 'Please authenticate' }); }
+};
 
 app.get('/api/health', (_, res) => res.json({ status: 'UP' }));
 
@@ -82,10 +97,7 @@ app.post('/api/auth/register', async (req, res) => {
     const user = await users.insert({ email: email.toLowerCase().trim(), password: hash, walletAddress: walletAddress || '', ecoPoints: 0, createdAt: new Date().toISOString() });
     const token = jwt.sign({ user: { id: user._id } }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user._id, email: user.email, walletAddress: user.walletAddress, ecoPoints: user.ecoPoints } });
-  } catch (err) {
-    console.error('Register error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (err) { console.error('Register error:', err); res.status(500).json({ message: 'Server error' }); }
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -98,23 +110,8 @@ app.post('/api/auth/login', async (req, res) => {
     if (!ok) return res.status(400).json({ message: 'Invalid credentials' });
     const token = jwt.sign({ user: { id: user._id } }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user._id, email: user.email, walletAddress: user.walletAddress, ecoPoints: user.ecoPoints } });
-  } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
+  } catch (err) { console.error('Login error:', err); res.status(500).json({ message: 'Server error' }); }
 });
-
-const auth = async (req, res, next) => {
-  try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) return res.status(401).json({ error: 'Authentication required' });
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await users.findOne({ _id: decoded.user.id });
-    if (!user) return res.status(401).json({ error: 'Invalid token' });
-    req.user = user;
-    next();
-  } catch { res.status(401).json({ error: 'Please authenticate' }); }
-};
 
 app.get('/api/auth/user', auth, async (req, res) => {
   const { password, ...safe } = req.user;
@@ -164,9 +161,9 @@ app.post('/api/products/validate', auth, async (req, res) => {
     if (already) return res.status(400).json({ valid: false, message: 'Already scanned' });
     await activities.insert({ userId: req.user._id, activityType: 'product_scan', details: { productId: product._id, name: product.name, brand: product.brand, points: product.points, barcode: product.barcode, imageUrl: product.imageUrl, scannedAt: new Date().toISOString() } });
     await users.update({ _id: req.user._id }, { $inc: { ecoPoints: product.points } });
-    res.json({ valid: true, message: 'Product validated', ecoPoints: product.points, scanRecord: { productId: product._id, name: product.name, brand: product.brand, points: product.points } });
+    res.json({ valid: true, message: 'Product validated', ecoPoints: product.points });
   } catch (err) { res.status(500).json({ valid: false, message: 'Server error' }); }
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log('Server running on port ' + PORT));
