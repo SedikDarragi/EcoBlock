@@ -1,37 +1,4 @@
 {
   "name": "ecoblock-server",
-  "version": "1.0.0",
-  "description": "EcoBlock Network Backend",
-  "main": "app.js",
-  "engines": {
-    "node": ">=18"
-  },
-  "type": "module",
-  "exports": {
-    "./middleware": "./server/middleware/index.js"
-  },
-  "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "test": "jest",
-    "prewarm:mongo": "node scripts/prewarmMongo.js"
-  },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "helmet": "^7.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.17.0",
-    "mongodb-memory-server": "^10.4.3",
-    "mongoose": "^8.0.3",
-    "morgan": "^1.10.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.0"
-  },
-  "allowScripts": {
-    "mongodb-memory-server@10.4.3": true
-  }
+  "type": "module"
 }
