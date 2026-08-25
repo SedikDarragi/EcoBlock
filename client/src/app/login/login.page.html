@@ -5,7 +5,7 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card>
+  <ion-card class="auth-card">
     <ion-card-header>
       <ion-card-title class="ion-text-center">
         Welcome Back
@@ -43,20 +43,22 @@
           type="submit" 
           [disabled]="loginForm.invalid || isLoading"
           class="ion-margin-top"
-        >Login
+        >
           <ion-spinner *ngIf="isLoading"></ion-spinner>
           <span *ngIf="!isLoading">Login</span>
         </ion-button>
       </form>
 
-      <div class="ion-text-center ion-margin-top">
+      <div class="auth-footer ion-margin-top">
         <p>Don't have an account?</p>
         <ion-button 
           routerLink="/register" 
           routerDirection="forward"
           fill="clear"
-          (click)="navigateToRegister()"> <!-- Add click handler -->
+          class="login-link"
+          (click)="navigateToRegister()">
           Create Account
+          <ion-icon slot="end" name="arrow-forward"></ion-icon>
         </ion-button>
       </div>
     </ion-card-content>

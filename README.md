@@ -1,5 +1,7 @@
 # EcoBlock Network
 
+> **Here is the Live Demo if you want to test it out:** [https://ecoblock-network.netlify.app](https://ecoblock-network.netlify.app)
+
 EcoBlock Network is a decentralized autonomous organization (DAO) and blockchain platform designed to incentivize, track, and verify sustainable actions across various ecological domains. It aims to foster a global community committed to reducing environmental impact by providing tangible rewards and transparent accountability for eco-friendly behaviors.
 
 ## Disclaimer
