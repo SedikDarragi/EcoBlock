@@ -14,6 +14,10 @@
 
 [**Try the Live Demo →**](https://ecoblock-network.netlify.app)
 
+<br/>
+
+<img src="demo.gif" alt="EcoBlock Network Demo" width="100%" />
+
 </div>
 
 ---
